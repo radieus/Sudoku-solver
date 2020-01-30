@@ -53,6 +53,8 @@ int main(int argc, char* argv[]) {
     uint64_t *old_boards;
     int *board_index;
 
+
+
     const int sk = pow(2,27);
     int host_count;
     int threadsPerBlock = 256;
@@ -61,17 +63,17 @@ int main(int argc, char* argv[]) {
     params_t params;
     float dt_ms;
 
-    gpuErrchk(cudaMalloc(&new_boards,sk*sizeof(uint64_t)));
-    gpuErrchk(cudaMalloc(&old_boards,sk*sizeof(uint64_t)));
-    gpuErrchk(cudaMalloc(&board_index,sizeof(int)));
+    gpuErrchk(cudaMallocManaged(&new_boards,sk*sizeof(uint64_t)));
+    gpuErrchk(cudaMallocManaged(&old_boards,sk*sizeof(uint64_t)));
+    gpuErrchk(cudaMallocManaged(&board_index,sizeof(int)));
 
     memset(test,0,N*sizeof(uint64_t));
     memset(check,0,N*sizeof(uint64_t));
     memset(fun,0,N*sizeof(uint64_t));
-    gpuErrchk(cudaMemset(board_index,0,sizeof(int)));
-    gpuErrchk(cudaMemset(new_boards,0,sk*sizeof(uint64_t)));
-    gpuErrchk(cudaMemset(old_boards,0,sk*sizeof(uint64_t)));
 
+    board_index = 0;
+    new_boards = 0;
+    gold_boards = 0;
 
 
     gpuErrchk(cudaEventCreate(&event1));
@@ -141,10 +143,6 @@ int main(int argc, char* argv[]) {
 
     cudaEventElapsedTime(&dt_ms, event1,event2);
     printf("Time : %f",dt_ms);
-
-    gpuErrchk(cudaFree(new_boards));
-    gpuErrchk(cudaFree(old_boards));
-    gpuErrchk(cudaFree(board_index));
 
     return 0; 
 }
