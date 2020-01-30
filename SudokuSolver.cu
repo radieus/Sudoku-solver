@@ -51,7 +51,6 @@ int main(int argc, char* argv[]) {
     uint64_t *old_boards;
     int *board_index;
 
-
     const int sk = pow(2,27);
     int host_count;
     int threadsPerBlock = 256;
@@ -60,47 +59,48 @@ int main(int argc, char* argv[]) {
     params_t params;
     float dt_ms;
 
-    gpuErrchk(cudaMallocManaged(&new_boards,sk*sizeof(uint64_t)));
-    gpuErrchk(cudaMallocManaged(&old_boards,sk*sizeof(uint64_t)));
-    gpuErrchk(cudaMallocManaged(&board_index,sizeof(int)));
+    gpuErrchk(cudaMalloc(&new_boards,sk*sizeof(uint64_t)));
+    gpuErrchk(cudaMalloc(&old_boards,sk*sizeof(uint64_t)));
+    gpuErrchk(cudaMalloc(&board_index,sizeof(int)));
 
     memset(test,0,N*sizeof(uint64_t));
     memset(check,0,N*sizeof(uint64_t));
     memset(fun,0,N*sizeof(uint64_t));
+    gpuErrchk(cudaMemset(board_index,0,sizeof(int)));
+    gpuErrchk(cudaMemset(new_boards,0,sk*sizeof(uint64_t)));
+    gpuErrchk(cudaMemset(old_boards,0,sk*sizeof(uint64_t)));
 
-    board_index = 0;
-    new_boards = 0;
-    old_boards = 0;
+
 
     gpuErrchk(cudaEventCreate(&event1));
     gpuErrchk(cudaEventCreate(&event2));
 
     //------------------------------------------------------------------------------------------------------------------------
-    setup_board(new_boards,test9);
+    setup_board(test,test9);
     //load("sudoku.txt", test);
     //------------------------------------------------------------------------------------------------------------------------
     
-    print_sudoku_from_b64(new_boards);
+    print_sudoku_from_b64(test);
 
-    zeros=count_zeros(new_boards);
-    //gpuErrchk(cudaMemcpy(new_boards,test,N*sizeof(uint64_t),cudaMemcpyHostToDevice));
+    zeros=count_zeros(test);
+    gpuErrchk(cudaMemcpy(new_boards,test,N*sizeof(uint64_t),cudaMemcpyHostToDevice));
 
     gpuErrchk(cudaEventRecord(event1));
 
-    params=find_epmty_index(new_boards,0,0);
+    params=find_epmty_index(test,0,0);
 
-    printf("Empty index %i : %i\n", params.row, params.col);
+    printf("Empty index %i : %i\n",params.row, params.col);
 
-    cudaBFSSudoku<<<1,N>>>(new_boards, old_boards, 1, board_index, params.row, params.col);
+    cudaBFSSudoku<<<1,N>>>(new_boards, old_boards, 1, board_index,params.row,params.col);
 
-    //gpuErrchk(cudaMemcpy(&fun, old_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost))
-    params=find_epmty_index(old_boards, params.row, params.col);
+    gpuErrchk(cudaMemcpy(&fun, old_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost))
+    params=find_epmty_index(fun,params.row,params.col);
 
 
     
     for (int i = 0; i<zeros; i++) {
 
-        //gpuErrchk(cudaMemcpy(&host_count, board_index, sizeof(int), cudaMemcpyDeviceToHost));
+        gpuErrchk(cudaMemcpy(&host_count, board_index, sizeof(int), cudaMemcpyDeviceToHost));
 
         printf("total boards after an iteration %d: %d\n", i, host_count);
 
@@ -110,29 +110,27 @@ int main(int argc, char* argv[]) {
 
         if (i % 2 == 0) {
             cudaBFSSudoku<<<maxBlocks,threadsPerBlock>>>(old_boards, new_boards, host_count, board_index,params.row,params.col);
-            //gpuErrchk(cudaMemcpy(&fun, new_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
-            params=find_epmty_index(new_boards,params.row,params.col);
+            gpuErrchk(cudaMemcpy(&fun, new_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
+            params=find_epmty_index(fun,params.row,params.col);
         }
         else {
             cudaBFSSudoku<<<maxBlocks,threadsPerBlock>>>(new_boards, old_boards, host_count, board_index,params.row,params.col);
-            //gpuErrchk(cudaMemcpy(&fun, old_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
-            params=find_epmty_index(old_boards,params.row,params.col);
+            gpuErrchk(cudaMemcpy(&fun, old_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
+            params=find_epmty_index(fun,params.row,params.col);
         }
     }
 
-    //gpuErrchk(cudaMemcpy(&host_count, board_index, sizeof(int), cudaMemcpyDeviceToHost));
+    gpuErrchk(cudaMemcpy(&host_count, board_index, sizeof(int), cudaMemcpyDeviceToHost));
     
-    // if(zeros % 2 == 0){
-    //     gpuErrchk(cudaMemcpy(&check, new_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
-        print_sudoku_from_b64(new_boards);
-    // }
-    // else{
-    //     gpuErrchk(cudaMemcpy(&check, old_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
-        print_sudoku_from_b64(old_boards);
-    // }
+    if(zeros % 2 == 0){ // if odd number of iterations run, then send it old boards not new boards;
+        gpuErrchk(cudaMemcpy(&check, new_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
+    }
+    else{
+        gpuErrchk(cudaMemcpy(&check, old_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
+    }
     
     printf("new number of boards retrieved is %d\n", host_count);
-    //print_sudoku_from_b64(check);
+    print_sudoku_from_b64(check);
 
 
     gpuErrchk(cudaEventRecord(event2));
@@ -141,6 +139,10 @@ int main(int argc, char* argv[]) {
 
     cudaEventElapsedTime(&dt_ms, event1,event2);
     printf("Time : %f",dt_ms);
+
+    gpuErrchk(cudaFree(new_boards));
+    gpuErrchk(cudaFree(old_boards));
+    gpuErrchk(cudaFree(board_index));
 
     return 0; 
 }

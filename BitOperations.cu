@@ -5,8 +5,6 @@
 #define N 9
 #define n 3
 
-
-
 typedef struct params{
     int row;
     int col;
