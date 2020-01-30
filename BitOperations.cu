@@ -13,7 +13,7 @@ typedef struct params{
 }params_t;
 
 
-__device__ __host__ void load(char *FileName, uint64_t *board) {
+__host__ void load(char *FileName, uint64_t *board) {
     FILE * a_file = fopen(FileName, "r");
 
     if (a_file == NULL) {
