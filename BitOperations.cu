@@ -37,7 +37,7 @@ __device__ __host__ void copy_bits(uint64_t src, uint64_t *dst, int src_offset, 
 
 }
 
-__device__ __host__ void load(char *FileName, int *board) 
+__device__ __host__ void load(char *FileName, uint64_t *board) 
 {
     FILE * a_file = fopen(FileName, "r");
 

@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
 
     cudaEvent_t event1,event2;
     
-    int test[N];
+    uint64_t test[N];
     uint64_t check[N];
     uint64_t fun[N];
 
@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
     gpuErrchk(cudaMalloc(&test64_2,sk*sizeof(uint64_t)));
     gpuErrchk(cudaMalloc(&board_index,sizeof(int)));
 
-    memset(test,0,N*sizeof(int));
+    memset(test,0,N*sizeof(uint64_t));
     memset(check,0,N*sizeof(uint64_t));
     memset(fun,0,N*sizeof(uint64_t));
     gpuErrchk(cudaMemset(board_index,0,sizeof(int)));
