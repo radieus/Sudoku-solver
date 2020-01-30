@@ -46,7 +46,7 @@ __device__ __host__ void setup_board(uint64_t *src, int *board){
     }
 }
 
-__device__ __host__ void printBoard(uint64_t *board) {
+__device__ __host__ void printBoard(int *board) {
     for (int i = 0; i < N; i++) {
         if (i % n == 0) {
             printf("-----------------------\n");
