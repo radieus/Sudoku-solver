@@ -38,7 +38,7 @@ __device__ __host__ void copy_bits(uint64_t src, uint64_t *dst, int src_offset, 
 
 }
 
-__device__ __host__ void setup_board(uint64_t *src, int *board){
+__device__ __host__ void setup_board(int *src, int *board){
     for(int i=0;i<N;i++){
         for(int j=0;j<N;j++){
             copy_bits(board[i*N+j], &src[i],0,j*4,4);
@@ -112,7 +112,7 @@ __device__ __host__ bool check_box(uint64_t *val, int row,int column, int value)
     return true;
 }
 
-__device__ __host__ int count_zeros(uint64_t *val){
+__device__ __host__ int count_zeros(int *val){
     int count=0;
     for(int i=0;i<N;i++){
         for(int j=0; j<N;j++){
