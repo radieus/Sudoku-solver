@@ -5,8 +5,8 @@
 #include "BitOperations.cu"
 
 
-__global__ void cudaBFSSudoku(uint64_t *old_boards,
-        uint64_t *new_boards,
+__global__ void cudaBFSSudoku(int *old_boards,
+        int *new_boards,
         int total_boards,
         int *board_index,
         int empty_row,
