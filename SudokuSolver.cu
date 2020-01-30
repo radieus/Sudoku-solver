@@ -59,8 +59,8 @@ int main(int argc, char* argv[]) {
     int maxBlocks;
     int zeros;
 
-    int row;
-    int col;
+    int row = 0;
+    int col = 0;
 
     params_t params;
 
