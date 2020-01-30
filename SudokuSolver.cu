@@ -118,12 +118,12 @@ int main(int argc, char* argv[]) {
 
         if (i % 2 == 0) {
             cudaBFSSudoku<<<maxBlocks,threadsPerBlock>>>(old_boards, new_boards, host_count, board_index, row, col);
-            gpuErrchk(cudaMemcpy(&fun, new_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
+            gpuErrchk(cudaMemcpy(&fun, new_boards, N*N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
             params=find_epmty_index(fun, row, col);
         }
         else {
             cudaBFSSudoku<<<maxBlocks,threadsPerBlock>>>(new_boards, old_boards, host_count, board_index, row, col);
-            gpuErrchk(cudaMemcpy(&fun, old_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
+            gpuErrchk(cudaMemcpy(&fun, old_boards, N*N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
             params=find_epmty_index(fun, row, col);
         }
     }
