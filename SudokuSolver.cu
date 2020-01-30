@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
 
     board_index = 0;
     new_boards = 0;
-    gold_boards = 0;
+    old_boards = 0;
 
 
     gpuErrchk(cudaEventCreate(&event1));
