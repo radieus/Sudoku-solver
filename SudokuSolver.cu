@@ -93,10 +93,10 @@ int main(int argc, char* argv[]) {
 
     printf("Empty index %i : %i\n", params.row, params.col);
 
-    cudaBFSSudoku<<<1,N>>>(new_boards, old_boards, 1, board_index, params.row, params.col);
+    cudaBFSSudoku<<<1,N>>>(test, old_boards, 1, board_index, params.row, params.col);
 
     //gpuErrchk(cudaMemcpy(&fun, old_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost))
-    params=find_epmty_index(fun, params.row, params.col);
+    params=find_epmty_index(old_boards, params.row, params.col);
 
 
     
@@ -112,13 +112,13 @@ int main(int argc, char* argv[]) {
 
         if (i % 2 == 0) {
             cudaBFSSudoku<<<maxBlocks,threadsPerBlock>>>(old_boards, new_boards, host_count, board_index,params.row,params.col);
-            gpuErrchk(cudaMemcpy(&fun, new_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
-            params=find_epmty_index(fun,params.row,params.col);
+            //gpuErrchk(cudaMemcpy(&fun, new_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
+            params=find_epmty_index(new_boards,params.row,params.col);
         }
         else {
             cudaBFSSudoku<<<maxBlocks,threadsPerBlock>>>(new_boards, old_boards, host_count, board_index,params.row,params.col);
-            gpuErrchk(cudaMemcpy(&fun, old_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
-            params=find_epmty_index(fun,params.row,params.col);
+            //gpuErrchk(cudaMemcpy(&fun, old_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
+            params=find_epmty_index(old_boards,params.row,params.col);
         }
     }
 
@@ -126,13 +126,15 @@ int main(int argc, char* argv[]) {
     
     // if(zeros % 2 == 0){
     //     gpuErrchk(cudaMemcpy(&check, new_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
+        print_sudoku_from_b64(new_boards);
     // }
     // else{
     //     gpuErrchk(cudaMemcpy(&check, old_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
+        print_sudoku_from_b64(old_boards);
     // }
     
     printf("new number of boards retrieved is %d\n", host_count);
-    print_sudoku_from_b64(check);
+    //print_sudoku_from_b64(check);
 
 
     gpuErrchk(cudaEventRecord(event2));
