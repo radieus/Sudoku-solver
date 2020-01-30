@@ -58,12 +58,7 @@ int main(int argc, char* argv[]) {
     int threadsPerBlock = 256;
     int maxBlocks;
     int zeros;
-
-    int row = 0;
-    int col = 0;
-
     params_t params;
-
     float dt_ms;
 
     gpuErrchk(cudaMalloc(&new_boards,sk*sizeof(uint64_t)));
@@ -94,15 +89,14 @@ int main(int argc, char* argv[]) {
 
     gpuErrchk(cudaEventRecord(event1));
 
-    findEmptySpot(test, &row, &col);
-    //params=find_epmty_index(test,0,0);
+    params=find_epmty_index(test,0,0);
 
-    printf("Empty index %i : %i\n",row, col);
+    printf("Empty index %i : %i\n",params.row, params.col);
 
-    cudaBFSSudoku<<<1,N>>>(new_boards, old_boards, 1, board_index, row, col);
+    cudaBFSSudoku<<<1,N>>>(new_boards, old_boards, 1, board_index,params.row,params.col);
 
     gpuErrchk(cudaMemcpy(&fun, old_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost))
-    params=find_epmty_index(fun, row, col);
+    params=find_epmty_index(fun,params.row,params.col);
 
 
     
@@ -117,14 +111,14 @@ int main(int argc, char* argv[]) {
         maxBlocks=(N*host_count+threadsPerBlock-1)/threadsPerBlock;
 
         if (i % 2 == 0) {
-            cudaBFSSudoku<<<maxBlocks,threadsPerBlock>>>(old_boards, new_boards, host_count, board_index, row, col);
-            gpuErrchk(cudaMemcpy(&fun, new_boards, N*N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
-            params=find_epmty_index(fun, row, col);
+            cudaBFSSudoku<<<maxBlocks,threadsPerBlock>>>(old_boards, new_boards, host_count, board_index,params.row,params.col);
+            gpuErrchk(cudaMemcpy(&fun, new_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
+            params=find_epmty_index(fun,params.row,params.col);
         }
         else {
-            cudaBFSSudoku<<<maxBlocks,threadsPerBlock>>>(new_boards, old_boards, host_count, board_index, row, col);
-            gpuErrchk(cudaMemcpy(&fun, old_boards, N*N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
-            params=find_epmty_index(fun, row, col);
+            cudaBFSSudoku<<<maxBlocks,threadsPerBlock>>>(new_boards, old_boards, host_count, board_index,params.row,params.col);
+            gpuErrchk(cudaMemcpy(&fun, old_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
+            params=find_epmty_index(fun,params.row,params.col);
         }
     }
 
