@@ -17,6 +17,25 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
    }
 }
 
+void printBoard(uint64_t *board) {
+    for (int i = 0; i < N; i++) {
+        if (i % n == 0) {
+            printf("-----------------------\n");
+        }
+
+    for (int j = 0; j < N; j++) {
+        if (j % n == 0) {
+            printf("| ");
+        }
+        printf("%d ", board[i * N + j]);
+    }
+
+    printf("|\n");
+
+    }
+
+    printf("-----------------------\n");
+}
 
 int main(int argc, char* argv[]) {
 
