@@ -63,7 +63,7 @@ __device__ __host__ void load(char *FileName, uint64_t *board)
     }
 }
 
-__device__ __host__ void printBoard(int *board) {
+__device__ __host__ void printBoard(uint64_t *board) {
     for (int i = 0; i < N; i++) {
         if (i % n == 0) {
             printf("-----------------------\n");
