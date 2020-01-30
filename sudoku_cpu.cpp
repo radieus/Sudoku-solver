@@ -7,19 +7,16 @@
 #include <string>
 #include <cmath>
 
-#include <cuda_runtime.h>
-
 #define N 9
 #define n 3
 
-
-__device__ void clearBitmap(bool *map, int size) {
+void clearBitmap(bool *map, int size) {
     for (int i = 0; i < size; i++) {
         map[i] = false;
     }
 }
 
-__device__ __host__ bool validBoard(int *board) {
+bool validBoard(int *board) {
     bool seen[N];
     clearBitmap(seen, N);
 
@@ -83,7 +80,7 @@ __device__ __host__ bool validBoard(int *board) {
 
 
 
-__device__ bool validBoard(int *board, int r, int c) {
+bool validBoard(int *board, int r, int c) {
 
     // if r is less than 0, then just default case
     if (r < 0) {
@@ -142,7 +139,7 @@ __device__ bool validBoard(int *board, int r, int c) {
     return true;
 }
 
-__device__ bool doneBoard(int *board) {
+bool doneBoard(int *board) {
     for (int i = 0; i < N * N; i++) {
         if (board[i] == 0) {
             return false;
@@ -152,7 +149,7 @@ __device__ bool doneBoard(int *board) {
     return true;
 }
 
-__device__ bool findEmptySpot(int *board, int *row, int *col) {
+bool findEmptySpot(int *board, int *row, int *col) {
     for (int r = 0; r < N; r++) {
         for (int c = 0; c < N; c++) {
             if (board[r * N + c] == 0) {
@@ -166,7 +163,7 @@ __device__ bool findEmptySpot(int *board, int *row, int *col) {
     return false;
 }
 
-__device__ bool solveHelper(int *board) {
+bool solveHelper(int *board) {
     int row;
     int col;
     if (!findEmptySpot(board, &row, &col)) {
@@ -184,7 +181,7 @@ __device__ bool solveHelper(int *board) {
     return false;
 }
 
-__globlal__ bool solve(int *board) {
+bool solve(int *board) {
 
     // initial board is invalid
     if (!validBoard(board, -1, -1)) {
@@ -214,7 +211,7 @@ __globlal__ bool solve(int *board) {
     }
 }
 
-__device__ __host__ void printBoard(int *board) {
+void printBoard(int *board) {
     for (int i = 0; i < N; i++) {
         if (i % n == 0) {
             printf("-----------------------\n");
@@ -234,7 +231,7 @@ __device__ __host__ void printBoard(int *board) {
     printf("-----------------------\n");
 }
 
-__device__ __host__ void load(char *FileName, int *board) 
+void load(char *FileName, int *board) 
 {
     FILE * a_file = fopen(FileName, "r");
 
@@ -257,55 +254,6 @@ __device__ __host__ void load(char *FileName, int *board)
                 board[i * N + j] = 0;
             }
         }
-    }
-}
-
-__global__ void sudokuBacktrack(int *boards, const int numBoards, int *emptySpaces, int *numEmptySpaces, int *finished, int *solved) 
-{
-
-    int index = blockDim.x * blockIdx.x + threadIdx.x;
-
-    int *currentBoard;
-    int *currentEmptySpaces;
-    int currentNumEmptySpaces;
-
-    while ((*finished == 0) && (index < numBoards)) {
-        int emptyIndex = 0;
-
-        currentBoard = boards + index * 81;
-        currentEmptySpaces = emptySpaces + index * 81;
-        currentNumEmptySpaces = numEmptySpaces[index];
-
-        while ((emptyIndex >= 0) && (emptyIndex < currentNumEmptySpaces)) {
-            currentBoard[currentEmptySpaces[emptyIndex]]++;
-            
-            if (!validBoard(currentBoard, currentEmptySpaces[emptyIndex])) {
-
-                // if the board is invalid and we tried all numbers here already, backtrack
-                // otherwise continue (it will just try the next number in the next iteration)
-                if (currentBoard[currentEmptySpaces[emptyIndex]] >= 9) {
-                    currentBoard[currentEmptySpaces[emptyIndex]] = 0;
-                    emptyIndex--;
-                }
-            }
-            // if valid board, move forward in algorithm
-            else {
-                emptyIndex++;
-            }
-
-        }
-
-        if (emptyIndex == currentNumEmptySpaces) {
-            // solved board found
-            *finished = 1;
-
-            // copy board to output
-            for (int i = 0; i < N * N; i++) {
-                solved[i] = currentBoard[i];
-            }
-        }
-
-        index += gridDim.x * blockDim.x;
     }
 }
 
