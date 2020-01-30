@@ -45,12 +45,12 @@ int main(int argc, char* argv[]) {
 #pragma region Delclaration
     cudaEvent_t event1,event2;
     
-    uint64_t test[N];
-    uint64_t check[N];
-    uint64_t fun[N];
+    int test[N];
+    int check[N];
+    int fun[N];
 
-    uint64_t *new_boards;
-    uint64_t *old_boards;
+    int *new_boards;
+    int *old_boards;
     int *board_index;
 
     const int sk = pow(2,27);
@@ -61,16 +61,16 @@ int main(int argc, char* argv[]) {
     params_t params;
     float dt_ms;
 
-    gpuErrchk(cudaMalloc(&new_boards,sk*sizeof(uint64_t)));
-    gpuErrchk(cudaMalloc(&old_boards,sk*sizeof(uint64_t)));
+    gpuErrchk(cudaMalloc(&new_boards,sk*sizeof(int)));
+    gpuErrchk(cudaMalloc(&old_boards,sk*sizeof(int)));
     gpuErrchk(cudaMalloc(&board_index,sizeof(int)));
 
-    memset(test,0,N*sizeof(uint64_t));
-    memset(check,0,N*sizeof(uint64_t));
-    memset(fun,0,N*sizeof(uint64_t));
+    memset(test,0,N*sizeof(int));
+    memset(check,0,N*sizeof(int));
+    memset(fun,0,N*sizeof(int));
     gpuErrchk(cudaMemset(board_index,0,sizeof(int)));
-    gpuErrchk(cudaMemset(new_boards,0,sk*sizeof(uint64_t)));
-    gpuErrchk(cudaMemset(old_boards,0,sk*sizeof(uint64_t)));
+    gpuErrchk(cudaMemset(new_boards,0,sk*sizeof(int)));
+    gpuErrchk(cudaMemset(old_boards,0,sk*sizeof(int)));
 
 
 
@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
     print_sudoku_from_b64(test);
 
     zeros=count_zeros(test);
-    gpuErrchk(cudaMemcpy(new_boards,test,N*sizeof(uint64_t),cudaMemcpyHostToDevice));
+    gpuErrchk(cudaMemcpy(new_boards,test,N*sizeof(int),cudaMemcpyHostToDevice));
 
     gpuErrchk(cudaEventRecord(event1));
 
@@ -94,7 +94,7 @@ int main(int argc, char* argv[]) {
 
     cudaBFSSudoku<<<1,N>>>(new_boards, old_boards, 1, board_index,params.row,params.col);
 
-    gpuErrchk(cudaMemcpy(&fun, old_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost))
+    gpuErrchk(cudaMemcpy(&fun, old_boards, N*sizeof(int), cudaMemcpyDeviceToHost))
     params=find_epmty_index(fun,params.row,params.col);
 
 
@@ -111,12 +111,12 @@ int main(int argc, char* argv[]) {
 
         if (i % 2 == 0) {
             cudaBFSSudoku<<<maxBlocks,threadsPerBlock>>>(old_boards, new_boards, host_count, board_index,params.row,params.col);
-            gpuErrchk(cudaMemcpy(&fun, new_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
+            gpuErrchk(cudaMemcpy(&fun, new_boards, N*sizeof(int), cudaMemcpyDeviceToHost));
             params=find_epmty_index(fun,params.row,params.col);
         }
         else {
             cudaBFSSudoku<<<maxBlocks,threadsPerBlock>>>(new_boards, old_boards, host_count, board_index,params.row,params.col);
-            gpuErrchk(cudaMemcpy(&fun, old_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
+            gpuErrchk(cudaMemcpy(&fun, old_boards, N*sizeof(int), cudaMemcpyDeviceToHost));
             params=find_epmty_index(fun,params.row,params.col);
         }
     }
@@ -124,10 +124,10 @@ int main(int argc, char* argv[]) {
     gpuErrchk(cudaMemcpy(&host_count, board_index, sizeof(int), cudaMemcpyDeviceToHost));
     
     if(zeros % 2 == 0){
-        gpuErrchk(cudaMemcpy(&check, new_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
+        gpuErrchk(cudaMemcpy(&check, new_boards, N*sizeof(int), cudaMemcpyDeviceToHost));
     }
     else{
-        gpuErrchk(cudaMemcpy(&check, old_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
+        gpuErrchk(cudaMemcpy(&check, old_boards, N*sizeof(int), cudaMemcpyDeviceToHost));
     }
     
     printf("new number of boards retrieved is %d\n", host_count);

@@ -13,17 +13,17 @@ typedef struct params{
 }params_t;
 
 
-__device__ __host__ void setbit(uint64_t val, uint64_t *data, int nshift) { 
+__device__ __host__ void setbit(int val, int *data, int nshift) { 
 	//set bit to data using val as sourse and nshift place where to set
 	*data = *data | (val << nshift);
 }
 
-__device__ __host__ int getbit(uint64_t input, int nshift) {
+__device__ __host__ int getbit(int input, int nshift) {
 	//return value in a certain position 0 or 1
 	return (input >> nshift) & 1;
 }
 
-__device__ __host__ void copy_bits(uint64_t src, uint64_t *dst, int src_offset, int dst_offset, int len) {
+__device__ __host__ void copy_bits(int src, int *dst, int src_offset, int dst_offset, int len) {
 	/*
 	src - source of bits
 	dst - destanation of bits
@@ -38,7 +38,7 @@ __device__ __host__ void copy_bits(uint64_t src, uint64_t *dst, int src_offset, 
 
 }
 
-__device__ __host__ void setup_board(uint64_t *src, int *board){
+__device__ __host__ void setup_board(int *src, int *board){
     for(int i=0;i<N;i++){
         for(int j=0;j<N;j++){
             copy_bits(board[i*N+j], &src[i],0,j*4,4);
@@ -46,7 +46,7 @@ __device__ __host__ void setup_board(uint64_t *src, int *board){
     }
 }
 
-__device__ __host__ void print_sudoku_from_b64(uint64_t *val) {
+__device__ __host__ void print_sudoku_from_b64(int *val) {
 
     for (int i = 0; i < N; i++) {
         if (i % n == 0) {
@@ -57,7 +57,7 @@ __device__ __host__ void print_sudoku_from_b64(uint64_t *val) {
             if (j % n == 0) {
             printf("| ");
             }
-            uint64_t tmp=0;
+            int tmp=0;
             copy_bits(val[i],&tmp,j*4,0,4);
             printf("%li ", tmp);
         }
@@ -67,11 +67,11 @@ __device__ __host__ void print_sudoku_from_b64(uint64_t *val) {
     printf("-----------------------\n");
 }
 
-__device__ __host__ params_t find_epmty_index(uint64_t *val, int row, int col){
+__device__ __host__ params_t find_epmty_index(int *val, int row, int col){
    
     for(int i=row;i<N;i++){
         for(int j=0;j<N;j++){
-            uint64_t tmp=0;
+            int tmp=0;
             copy_bits(val[i],&tmp,j*4,0,4);
             if(tmp==0){
                 params_t temp={i,j};
@@ -83,9 +83,9 @@ __device__ __host__ params_t find_epmty_index(uint64_t *val, int row, int col){
     return temp;
 }
 
-__device__ __host__ bool check_row(uint64_t *val, int row, int value){
+__device__ __host__ bool check_row(int *val, int row, int value){
     for(int i=0;i<N;i++){
-        uint64_t tmp=0;
+        int tmp=0;
         copy_bits(val[row],&tmp,i*4,0,4);
         if(tmp==value)
             return false;
@@ -93,9 +93,9 @@ __device__ __host__ bool check_row(uint64_t *val, int row, int value){
     return true;
 }
 
-__device__ __host__ bool check_col(uint64_t *val, int column, int value){
+__device__ __host__ bool check_col(int *val, int column, int value){
     for(int i=0;i<N;i++){
-        uint64_t tmp=0;
+        int tmp=0;
         copy_bits(val[i],&tmp,column*4,0,4);
         if(tmp==value)
             return false;
@@ -103,10 +103,10 @@ __device__ __host__ bool check_col(uint64_t *val, int column, int value){
     return true;
 }
 
-__device__ __host__ bool check_box(uint64_t *val, int row,int column, int value){
+__device__ __host__ bool check_box(int *val, int row,int column, int value){
     for(int i=row*n;i<row*n+n;i++){
         for(int j=column*n; j<column*n+n;j++){
-            uint64_t tmp=0;
+            int tmp=0;
             copy_bits(val[i],&tmp,j*4,0,4);
             if(tmp==value)
                 return false;
@@ -115,11 +115,11 @@ __device__ __host__ bool check_box(uint64_t *val, int row,int column, int value)
     return true;
 }
 
-__device__ __host__ int count_zeros(uint64_t *val){
+__device__ __host__ int count_zeros(int *val){
     int count=0;
     for(int i=0;i<N;i++){
         for(int j=0; j<N;j++){
-            uint64_t tmp=0;
+            int tmp=0;
             copy_bits(val[i],&tmp,j*4,0,4);
             if(tmp==0)
                 count++;
