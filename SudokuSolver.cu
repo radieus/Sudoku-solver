@@ -66,6 +66,7 @@ int main(int argc, char* argv[]) {
     gpuErrchk(cudaMallocManaged(&new_boards,sk*sizeof(uint64_t)));
     gpuErrchk(cudaMallocManaged(&old_boards,sk*sizeof(uint64_t)));
     gpuErrchk(cudaMallocManaged(&board_index,sizeof(int)));
+    gpuErrchk(cudaMallocManaged(&host_count,sizeof(int)));
 
     memset(test,0,N*sizeof(uint64_t));
     memset(check,0,N*sizeof(uint64_t));
