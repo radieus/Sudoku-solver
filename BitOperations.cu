@@ -63,25 +63,25 @@ __device__ __host__ void load(char *FileName, uint64_t *board)
     }
 }
 
-// __device__ __host__ void printBoard(uint64_t *board) {
-//     for (int i = 0; i < N; i++) {
-//         if (i % n == 0) {
-//             printf("-----------------------\n");
-//         }
+__device__ __host__ void printBoard(uint64_t *board) {
+    for (int i = 0; i < N; i++) {
+        if (i % n == 0) {
+            printf("-----------------------\n");
+        }
 
-//     for (int j = 0; j < N; j++) {
-//         if (j % n == 0) {
-//             printf("| ");
-//         }
-//         printf("%d ", board[i * N + j]);
-//     }
+    for (int j = 0; j < N; j++) {
+        if (j % n == 0) {
+            printf("| ");
+        }
+        printf("%d ", board[i * N + j]);
+    }
 
-//     printf("|\n");
+    printf("|\n");
 
-//     }
+    }
 
-//     printf("-----------------------\n");
-// }
+    printf("-----------------------\n");
+}
 
 // __device__ __host__ void print_sudoku_from_b64(uint64_t *val) {
 
