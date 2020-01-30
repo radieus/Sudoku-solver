@@ -60,9 +60,7 @@ int main(int argc, char* argv[]) {
     int zeros;
     params_t params;
     float dt_ms;
-#pragma endregion
 
-#pragma region Initialization
     gpuErrchk(cudaMalloc(&test64_1,sk*sizeof(uint64_t)));
     gpuErrchk(cudaMalloc(&test64_2,sk*sizeof(uint64_t)));
     gpuErrchk(cudaMalloc(&board_index,sizeof(int)));
@@ -87,9 +85,6 @@ int main(int argc, char* argv[]) {
 
     zeros=count_zeros(test);
     gpuErrchk(cudaMemcpy(test64_1,test,N*sizeof(uint64_t),cudaMemcpyHostToDevice));
-#pragma endregion
-
-#pragma region Exeqution
 
     gpuErrchk(cudaEventRecord(event1));
 
@@ -111,10 +106,6 @@ int main(int argc, char* argv[]) {
         printf("total boards after an iteration %d: %d\n", i, host_count);
 
         gpuErrchk(cudaMemset(board_index, 0, sizeof(int)));
-        /*if(host_count<N)
-            threadsPerBlock=N;
-        else
-            threadsPerBlock=256;*/
 
         maxBlocks=(N*host_count+threadsPerBlock-1)/threadsPerBlock;
 
@@ -138,8 +129,6 @@ int main(int argc, char* argv[]) {
     else{
         gpuErrchk(cudaMemcpy(&check, test64_2, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
     }
-
-    //gpuErrchk(cudaMemcpy(&check, test64_2, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
     
     printf("new number of boards retrieved is %d\n", host_count);
     print_sudoku_from_b64(check);
@@ -151,13 +140,10 @@ int main(int argc, char* argv[]) {
 
     cudaEventElapsedTime(&dt_ms, event1,event2);
     printf("Time : %f",dt_ms);
-#pragma endregion
 
-#pragma region Free
     gpuErrchk(cudaFree(test64_1));
     gpuErrchk(cudaFree(test64_2));
     gpuErrchk(cudaFree(board_index));
-#pragma endregion 
 
     return 0; 
 }
