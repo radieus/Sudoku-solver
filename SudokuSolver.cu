@@ -1,11 +1,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>  
-#include <inttypes.h>
-#include <math.h>
 #include <string.h>
+#include <time.h>
+#include <math.h>
+#include <inttypes.h>
 
 #include "CudaSudoku.cu"
+#include "samples.h"
+
 
 
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
@@ -18,9 +21,28 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
    }
 }
 
+void printBoard(int *board) {
+    for (int i = 0; i < N; i++) {
+        if (i % n == 0) {
+            printf("-----------------------\n");
+        }
+
+        for (int j = 0; j < N; j++) {
+            if (j % n == 0) {
+            printf("| ");
+            }
+            printf("%d ", board[i * N + j]);
+        }
+
+        printf("|\n");
+    }
+    printf("-----------------------\n");
+}
+
 
 int main(int argc, char* argv[]) {
 
+#pragma region Delclaration
     cudaEvent_t event1,event2;
     
     uint64_t test[N];
@@ -38,7 +60,9 @@ int main(int argc, char* argv[]) {
     int zeros;
     params_t params;
     float dt_ms;
+#pragma endregion
 
+#pragma region Initialization
     gpuErrchk(cudaMalloc(&test64_1,sk*sizeof(uint64_t)));
     gpuErrchk(cudaMalloc(&test64_2,sk*sizeof(uint64_t)));
     gpuErrchk(cudaMalloc(&board_index,sizeof(int)));
@@ -50,17 +74,22 @@ int main(int argc, char* argv[]) {
     gpuErrchk(cudaMemset(test64_1,0,sk*sizeof(uint64_t)));
     gpuErrchk(cudaMemset(test64_2,0,sk*sizeof(uint64_t)));
 
+
+
     gpuErrchk(cudaEventCreate(&event1));
     gpuErrchk(cudaEventCreate(&event2));
 
-
-    load("sudoku.txt", test);
-    printBoard(test);
-
+    //------------------------------------------------------------------------------------------------------------------------
+    setup_board(test,test9);
+    //------------------------------------------------------------------------------------------------------------------------
+    
+    print_sudoku_from_b64(test);
 
     zeros=count_zeros(test);
     gpuErrchk(cudaMemcpy(test64_1,test,N*sizeof(uint64_t),cudaMemcpyHostToDevice));
+#pragma endregion
 
+#pragma region Exeqution
 
     gpuErrchk(cudaEventRecord(event1));
 
@@ -74,7 +103,7 @@ int main(int argc, char* argv[]) {
     params=find_epmty_index(fun,params.row,params.col);
 
 
-
+    
     for (int i = 0; i<zeros; i++) {
 
         gpuErrchk(cudaMemcpy(&host_count, board_index, sizeof(int), cudaMemcpyDeviceToHost));
@@ -82,6 +111,10 @@ int main(int argc, char* argv[]) {
         printf("total boards after an iteration %d: %d\n", i, host_count);
 
         gpuErrchk(cudaMemset(board_index, 0, sizeof(int)));
+        /*if(host_count<N)
+            threadsPerBlock=N;
+        else
+            threadsPerBlock=256;*/
 
         maxBlocks=(N*host_count+threadsPerBlock-1)/threadsPerBlock;
 
@@ -105,9 +138,11 @@ int main(int argc, char* argv[]) {
     else{
         gpuErrchk(cudaMemcpy(&check, test64_2, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
     }
+
+    //gpuErrchk(cudaMemcpy(&check, test64_2, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
     
     printf("new number of boards retrieved is %d\n", host_count);
-    printBoard(check);
+    print_sudoku_from_b64(check);
 
 
     gpuErrchk(cudaEventRecord(event2));
@@ -116,11 +151,13 @@ int main(int argc, char* argv[]) {
 
     cudaEventElapsedTime(&dt_ms, event1,event2);
     printf("Time : %f",dt_ms);
+#pragma endregion
 
-
+#pragma region Free
     gpuErrchk(cudaFree(test64_1));
     gpuErrchk(cudaFree(test64_2));
-    gpuErrchk(cudaFree(board_index)); 
+    gpuErrchk(cudaFree(board_index));
+#pragma endregion 
 
     return 0; 
 }

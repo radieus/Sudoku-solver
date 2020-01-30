@@ -6,6 +6,7 @@
 #define n 3
 
 
+
 typedef struct params{
     int row;
     int col;
@@ -33,77 +34,38 @@ __device__ __host__ void copy_bits(uint64_t src, uint64_t *dst, int src_offset, 
 	for (int i = 0; i < len; i++) {
 		setbit(getbit(src, src_offset + i), dst, i + dst_offset);
     }
-
+    
 
 }
 
-
-__device__ __host__ void load(char *FileName, uint64_t *board) 
-{
-    FILE * a_file = fopen(FileName, "r");
-
-    if (a_file == NULL) {
-      printf("File load fail!\n"); return;
-    }
-
-    char temp;
-
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < N; j++) {
-            if (!fscanf(a_file, "%c\n", &temp)) {
-                printf("File loading error!\n");
-                return;
-            }
-
-            if (temp >= '1' && temp <= '9') {
-                board[i * N + j] = (int) (temp - '0');
-            } else {
-                board[i * N + j] = 0;
-            }
+__device__ __host__ void setup_board(uint64_t *src, int *board){
+    for(int i=0;i<N;i++){
+        for(int j=0;j<N;j++){
+            copy_bits(board[i*N+j], &src[i],0,j*4,4);
         }
     }
 }
 
-__device__ __host__ void printBoard(uint64_t *board) {
+__device__ __host__ void print_sudoku_from_b64(uint64_t *val) {
+
     for (int i = 0; i < N; i++) {
         if (i % n == 0) {
             printf("-----------------------\n");
         }
 
-    for (int j = 0; j < N; j++) {
-        if (j % n == 0) {
+        for (int j = 0; j < N; j++) {
+            if (j % n == 0) {
             printf("| ");
+            }
+            uint64_t tmp=0;
+            copy_bits(val[i],&tmp,j*4,0,4);
+            printf("%li ", tmp);
         }
-        printf("%d ", board[i * N + j]);
+
+        printf("|\n");
     }
-
-    printf("|\n");
-
-    }
-
     printf("-----------------------\n");
 }
-
-// __device__ __host__ void print_sudoku_from_b64(uint64_t *val) {
-
-//     for (int i = 0; i < N; i++) {
-//         if (i % n == 0) {
-//             printf("-----------------------\n");
-//         }
-
-//         for (int j = 0; j < N; j++) {
-//             if (j % n == 0) {
-//             printf("| ");
-//             }
-//             uint64_t tmp=0;
-//             copy_bits(val[i],&tmp,j*4,0,4);
-//             printf("%li ", tmp);
-//         }
-
-//         printf("|\n");
-//     }
-//     printf("-----------------------\n");
-// }
 
 __device__ __host__ params_t find_epmty_index(uint64_t *val, int row, int col){
    
