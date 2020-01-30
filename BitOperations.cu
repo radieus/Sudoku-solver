@@ -92,6 +92,20 @@ __device__ __host__ void print_sudoku_from_b64(uint64_t *val) {
     printf("-----------------------\n");
 }
 
+__device__ __host__ bool findEmptySpot(int *board, int *row, int *col) {
+    for (int r = 0; r < N; r++) {
+        for (int c = 0; c < N; c++) {
+            if (board[r * N + c] == 0) {
+                *row = r;
+                *col = c;
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 __device__ __host__ params_t find_epmty_index(uint64_t *val, int row, int col){
    
     for(int i=row;i<N;i++){
