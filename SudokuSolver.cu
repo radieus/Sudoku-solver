@@ -106,7 +106,7 @@ int main(int argc, char* argv[]) {
 
         printf("total boards after an iteration %d: %d\n", i, host_count);
 
-        gpuErrchk(cudaMemset(board_index, 0, sizeof(int)));
+        //gpuErrchk(cudaMemset(board_index, 0, sizeof(int)));
 
         maxBlocks=(N*host_count+threadsPerBlock-1)/threadsPerBlock;
 
