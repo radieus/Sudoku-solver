@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
     gpuErrchk(cudaMalloc(&old_boards,sk*sizeof(uint64_t)));
     gpuErrchk(cudaMalloc(&board_index,sizeof(int)));
 
-    memset(test,0,N*sizeof(uint64_t));
+    memset(test,0,N*N*sizeof(uint64_t));
     memset(check,0,N*sizeof(uint64_t));
     memset(fun,0,N*sizeof(uint64_t));
     gpuErrchk(cudaMemset(board_index,0,sizeof(int)));
@@ -71,13 +71,12 @@ int main(int argc, char* argv[]) {
     gpuErrchk(cudaMemset(old_boards,0,sk*sizeof(uint64_t)));
 
 
-
     gpuErrchk(cudaEventCreate(&event1));
     gpuErrchk(cudaEventCreate(&event2));
 
     //------------------------------------------------------------------------------------------------------------------------
-    setup_board(test,test9);
-    //load("sudoku.txt", test);
+    //setup_board(test,test9);
+    load("sudoku.txt", test);
     //------------------------------------------------------------------------------------------------------------------------
     
     print_sudoku_from_b64(test);
