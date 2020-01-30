@@ -4,9 +4,6 @@
 #include <cuda_runtime.h>
 #include "BitOperations.cu"
 
-//#define N 4
-//#define n 2
-
 
 __global__ void cudaBFSSudoku(uint64_t *old_boards,
         uint64_t *new_boards,
