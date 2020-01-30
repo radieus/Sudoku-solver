@@ -52,7 +52,6 @@ int main(int argc, char* argv[]) {
     int *board_index;
 
 
-
     const int sk = pow(2,27);
     int host_count;
     int threadsPerBlock = 256;
@@ -73,27 +72,26 @@ int main(int argc, char* argv[]) {
     new_boards = 0;
     old_boards = 0;
 
-
     gpuErrchk(cudaEventCreate(&event1));
     gpuErrchk(cudaEventCreate(&event2));
 
     //------------------------------------------------------------------------------------------------------------------------
-    setup_board(test,test9);
+    setup_board(new_boards,test9);
     //load("sudoku.txt", test);
     //------------------------------------------------------------------------------------------------------------------------
     
-    print_sudoku_from_b64(test);
+    print_sudoku_from_b64(new_boards);
 
-    zeros=count_zeros(test);
+    zeros=count_zeros(new_boards);
     //gpuErrchk(cudaMemcpy(new_boards,test,N*sizeof(uint64_t),cudaMemcpyHostToDevice));
 
     gpuErrchk(cudaEventRecord(event1));
 
-    params=find_epmty_index(test,0,0);
+    params=find_epmty_index(new_boards,0,0);
 
     printf("Empty index %i : %i\n", params.row, params.col);
 
-    cudaBFSSudoku<<<1,N>>>(test, old_boards, 1, board_index, params.row, params.col);
+    cudaBFSSudoku<<<1,N>>>(new_boards, old_boards, 1, board_index, params.row, params.col);
 
     //gpuErrchk(cudaMemcpy(&fun, old_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost))
     params=find_epmty_index(old_boards, params.row, params.col);
@@ -106,7 +104,7 @@ int main(int argc, char* argv[]) {
 
         printf("total boards after an iteration %d: %d\n", i, host_count);
 
-        //gpuErrchk(cudaMemset(board_index, 0, sizeof(int)));
+        gpuErrchk(cudaMemset(board_index, 0, sizeof(int)));
 
         maxBlocks=(N*host_count+threadsPerBlock-1)/threadsPerBlock;
 
