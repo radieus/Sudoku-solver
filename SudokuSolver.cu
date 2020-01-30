@@ -9,8 +9,6 @@
 #include "CudaSudoku.cu"
 #include "samples.h"
 
-
-
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)
 {
@@ -93,12 +91,12 @@ int main(int argc, char* argv[]) {
 
     params=find_epmty_index(test,0,0);
 
-    printf("Empty index %i : %i\n",params.row, params.col);
+    printf("Empty index %i : %i\n", params.row, params.col);
 
-    cudaBFSSudoku<<<1,N>>>(new_boards, old_boards, 1, board_index,params.row,params.col);
+    cudaBFSSudoku<<<1,N>>>(new_boards, old_boards, 1, board_index, params.row, params.col);
 
     //gpuErrchk(cudaMemcpy(&fun, old_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost))
-    params=find_epmty_index(fun,params.row,params.col);
+    params=find_epmty_index(fun, params.row, params.col);
 
 
     
@@ -114,12 +112,12 @@ int main(int argc, char* argv[]) {
 
         if (i % 2 == 0) {
             cudaBFSSudoku<<<maxBlocks,threadsPerBlock>>>(old_boards, new_boards, host_count, board_index,params.row,params.col);
-            //gpuErrchk(cudaMemcpy(&fun, new_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
+            gpuErrchk(cudaMemcpy(&fun, new_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
             params=find_epmty_index(fun,params.row,params.col);
         }
         else {
             cudaBFSSudoku<<<maxBlocks,threadsPerBlock>>>(new_boards, old_boards, host_count, board_index,params.row,params.col);
-            //gpuErrchk(cudaMemcpy(&fun, old_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
+            gpuErrchk(cudaMemcpy(&fun, old_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
             params=find_epmty_index(fun,params.row,params.col);
         }
     }
