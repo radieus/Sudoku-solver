@@ -21,23 +21,6 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
    }
 }
 
-void printBoard(int *board) {
-    for (int i = 0; i < N; i++) {
-        if (i % n == 0) {
-            printf("-----------------------\n");
-        }
-
-        for (int j = 0; j < N; j++) {
-            if (j % n == 0) {
-            printf("| ");
-            }
-            printf("%d ", board[i * N + j]);
-        }
-
-        printf("|\n");
-    }
-    printf("-----------------------\n");
-}
 
 
 int main(int argc, char* argv[]) {
@@ -77,11 +60,10 @@ int main(int argc, char* argv[]) {
     gpuErrchk(cudaEventCreate(&event1));
     gpuErrchk(cudaEventCreate(&event2));
 
-    //------------------------------------------------------------------------------------------------------------------------
+
     setup_board(test,test9);
-    //------------------------------------------------------------------------------------------------------------------------
     
-    print_sudoku_from_b64(test);
+    printBoard(test);
 
     zeros=count_zeros(test);
     gpuErrchk(cudaMemcpy(test64_1,test,N*sizeof(uint64_t),cudaMemcpyHostToDevice));
@@ -131,7 +113,7 @@ int main(int argc, char* argv[]) {
     }
     
     printf("new number of boards retrieved is %d\n", host_count);
-    print_sudoku_from_b64(check);
+    printBoard(check);
 
 
     gpuErrchk(cudaEventRecord(event2));

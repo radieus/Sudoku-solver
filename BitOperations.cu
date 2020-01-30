@@ -46,8 +46,7 @@ __device__ __host__ void setup_board(uint64_t *src, int *board){
     }
 }
 
-__device__ __host__ void print_sudoku_from_b64(uint64_t *val) {
-
+__device__ __host__ void printBoard(uint64_t *board) {
     for (int i = 0; i < N; i++) {
         if (i % n == 0) {
             printf("-----------------------\n");
@@ -57,9 +56,7 @@ __device__ __host__ void print_sudoku_from_b64(uint64_t *val) {
             if (j % n == 0) {
             printf("| ");
             }
-            uint64_t tmp=0;
-            copy_bits(val[i],&tmp,j*4,0,4);
-            printf("%li ", tmp);
+            printf("%d ", board[i * N + j]);
         }
 
         printf("|\n");
