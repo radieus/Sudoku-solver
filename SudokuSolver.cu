@@ -43,25 +43,25 @@ int main(int argc, char* argv[]) {
     gpuErrchk(cudaMallocManaged(&board_index,sizeof(int)));
 
     memset(test,0,N*sizeof(uint64_t));
-    memset(check,0,N*sizeof(uint64_t));
-    memset(fun,0,N*sizeof(uint64_t));
+    // memset(check,0,N*sizeof(uint64_t));
+    // memset(fun,0,N*sizeof(uint64_t));
 
     gpuErrchk(cudaEventCreate(&event1));
     gpuErrchk(cudaEventCreate(&event2));
 
     //------------------------------------------------------------------------------------------------------------------------
-    setup_board(new_boards,test9);
+    setup_board(test,test9);
     //load("sudoku.txt", test);
     //------------------------------------------------------------------------------------------------------------------------
     
     print_sudoku_from_b64(test);
 
     zeros=count_zeros(test);
-    //gpuErrchk(cudaMemcpy(new_boards,test,N*sizeof(uint64_t),cudaMemcpyHostToDevice));
+    gpuErrchk(cudaMemcpy(new_boards,test,N*sizeof(uint64_t),cudaMemcpyHostToDevice));
 
     gpuErrchk(cudaEventRecord(event1));
 
-    params=find_epmty_index(new_boards,0,0);
+    params=find_epmty_index(test,0,0);
 
     printf("Empty index %i : %i\n",params.row, params.col);
 
@@ -74,10 +74,10 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i<zeros; i++) {
 
         //gpuErrchk(cudaMemcpy(&host_count, board_index, sizeof(int), cudaMemcpyDeviceToHost));
-        host_count = (int*)board_index;
-        printf("total boards after an iteration %d: %d\n", i, host_count);
+        printf("total boards after an iteration %d: %d\n", i, board_index);
 
-        gpuErrchk(cudaMemset(board_index, 0, sizeof(int)));
+        //gpuErrchk(cudaMemset(board_index, 0, sizeof(int)));
+        board_index = 0;
 
         maxBlocks=(N*host_count+256-1)/256;
 
@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
     }
     
     printf("new number of boards retrieved is %d\n", host_count);
-    print_sudoku_from_b64(check);
+    //print_sudoku_from_b64(check);
 
 
     gpuErrchk(cudaEventRecord(event2));
@@ -115,9 +115,9 @@ int main(int argc, char* argv[]) {
     cudaEventElapsedTime(&dt_ms, event1,event2);
     printf("Time : %f",dt_ms);
 
-    // gpuErrchk(cudaFree(new_boards));
-    // gpuErrchk(cudaFree(old_boards));
-    // gpuErrchk(cudaFree(board_index));
+    gpuErrchk(cudaFree(new_boards));
+    gpuErrchk(cudaFree(old_boards));
+    gpuErrchk(cudaFree(board_index));
 
     return 0; 
 }
