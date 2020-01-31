@@ -41,20 +41,20 @@ int main(int argc, char* argv[]) {
     params_t params;
 
     setup_board(test,sample_board);
-    print_sudoku_from_b64(test);
+    print_sudoku(test);
 
     zeros=count_zeros(test);
 
     gpuErrchk(cudaMemcpy(new_boards,test,N*sizeof(uint64_t),cudaMemcpyHostToDevice));
 
     auto start = std::chrono::high_resolution_clock::now(); 
-    params=find_epmty_index(test,0,0);
+    params=find_empty_index(test,0,0);
 
     printf("Empty index %i : %i\n", params.row, params.col);
 
     cudaBFSSudoku<<<1,N>>>(new_boards, old_boards, 1, board_index, params.row, params.col);
 
-    params=find_epmty_index(old_boards, params.row, params.col);
+    params=find_empty_index(old_boards, params.row, params.col);
     
     for (int i = 0; i<zeros; i++) {
 
@@ -67,11 +67,11 @@ int main(int argc, char* argv[]) {
 
         if (i % 2 == 0) {
             cudaBFSSudoku<<<maxBlocks,256>>>(old_boards, new_boards, host_count, board_index, params.row, params.col);
-            params=find_epmty_index(new_boards, params.row, params.col);
+            params=find_empty_index(new_boards, params.row, params.col);
         }
         else {
             cudaBFSSudoku<<<maxBlocks,256>>>(new_boards, old_boards, host_count, board_index, params.row, params.col);
-            params=find_epmty_index(old_boards, params.row, params.col);
+            params=find_empty_index(old_boards, params.row, params.col);
         }
     }
 
