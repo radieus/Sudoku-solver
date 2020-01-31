@@ -93,14 +93,14 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    gpuErrchk(cudaMemcpy(&host_count, board_index, sizeof(int), cudaMemcpyDeviceToHost));
+    //gpuErrchk(cudaMemcpy(&host_count, board_index, sizeof(int), cudaMemcpyDeviceToHost));
     
     if(zeros % 2 == 0){ // if odd number of iterations run, then send it old boards not new boards;
         //gpuErrchk(cudaMemcpy(&check, new_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
-        check = new_boards;
+        print_sudoku_from_b64(new_boards);
     }
     else{
-        check = old_boards;
+        print_sudoku_from_b64(old_boards);
         //gpuErrchk(cudaMemcpy(&check, old_boards, N*sizeof(uint64_t), cudaMemcpyDeviceToHost));
     }
     
