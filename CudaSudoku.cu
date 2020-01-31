@@ -24,6 +24,7 @@ __global__ void cudaBFSSudoku(uint64_t *old_boards,
 
         int box_row = empty_row/n;
         int box_col = empty_col/n;
+        
 
         if (!check_row(old_boards+index*N,empty_row,attempt)) 
             works = false;
