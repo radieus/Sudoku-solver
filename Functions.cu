@@ -25,27 +25,6 @@ __device__ __host__ bool findEmptySpot(uint64_t *board, int *row, int *col) {
     return false;
 }
 
-__device__ __host__ void print_sudoku(uint64_t *val) {
-
-    for (int i = 0; i < N; i++) {
-        if (i % n == 0) {
-            printf("------------------------\n");
-        }
-
-        for (int j = 0; j < N; j++) {
-            if (j % n == 0) {
-            printf("| ");
-            }
-            uint64_t tmp=0;
-            copy_bits(val[i],&tmp,j*4,0,4);
-            printf("%li ", tmp);
-        }
-
-        printf("|\n");
-    }
-    printf("------------------------\n");
-}
-
 
 __device__ __host__ void setbit(uint64_t val, uint64_t *data, int nshift) { 
 	//set bit to data using val as sourse and nshift place where to set
@@ -70,6 +49,28 @@ __device__ __host__ void copy_bits(uint64_t src, uint64_t *dst, int src_offset, 
     }
 
 }
+
+__device__ __host__ void print_sudoku(uint64_t *val) {
+
+    for (int i = 0; i < N; i++) {
+        if (i % n == 0) {
+            printf("------------------------\n");
+        }
+
+        for (int j = 0; j < N; j++) {
+            if (j % n == 0) {
+            printf("| ");
+            }
+            uint64_t tmp=0;
+            copy_bits(val[i],&tmp,j*4,0,4);
+            printf("%li ", tmp);
+        }
+
+        printf("|\n");
+    }
+    printf("------------------------\n");
+}
+
 
 __device__ __host__ void setup_board(uint64_t *src, int *board){
     for(int i=0;i<N;i++){
