@@ -11,46 +11,6 @@ typedef struct params{
     int col;
 }params_t;
 
-__global__ void cudaBFSSudoku(uint64_t *old_boards,
-        uint64_t *new_boards,
-        int total_boards,
-        int *board_index,
-        int empty_row,
-        int empty_col) {
-    
-    unsigned int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    
-    unsigned int index=tid/N;
-
-    int attempt = tid - N*index + 1;
-
-    while (index < total_boards) {
-
-        int next_board_index=0;           
-        bool works = true;
-
-        int box_row = empty_row/n;
-        int box_col = empty_col/n;
-
-        if (!check_row(old_boards+index*N,empty_row,attempt)) 
-            works = false;
-        else if (!check_col(old_boards+index*N,empty_col,attempt)) 
-            works = false;
-        else if (!check_box(old_boards+index*N,box_row,box_col,attempt))
-            works = false;
-
-        if (works) {
-            next_board_index = atomicAdd(board_index, 1);
-            for (int i = 0; i < N; i++) {
-                new_boards[next_board_index*N+i]=old_boards[index*N+i];
-            }
-            copy_bits(attempt, &(new_boards+next_board_index*N)[empty_row],0,empty_col*4,4);
-            }
-
-        break; 
-    }  
-}
-
 __device__ __host__ bool findEmptySpot(uint64_t *board, int *row, int *col) {
     for (int r = 0; r < N; r++) {
         for (int c = 0; c < N; c++) {
@@ -181,3 +141,42 @@ __device__ __host__ int count_zeros(uint64_t *val){
     return count;
 }
 
+__global__ void cudaBFSSudoku(uint64_t *old_boards,
+    uint64_t *new_boards,
+    int total_boards,
+    int *board_index,
+    int empty_row,
+    int empty_col) {
+
+unsigned int tid = blockIdx.x * blockDim.x + threadIdx.x;
+
+unsigned int index=tid/N;
+
+int attempt = tid - N*index + 1;
+
+while (index < total_boards) {
+
+    int next_board_index=0;           
+    bool works = true;
+
+    int box_row = empty_row/n;
+    int box_col = empty_col/n;
+
+    if (!check_row(old_boards+index*N,empty_row,attempt)) 
+        works = false;
+    else if (!check_col(old_boards+index*N,empty_col,attempt)) 
+        works = false;
+    else if (!check_box(old_boards+index*N,box_row,box_col,attempt))
+        works = false;
+
+    if (works) {
+        next_board_index = atomicAdd(board_index, 1);
+        for (int i = 0; i < N; i++) {
+            new_boards[next_board_index*N+i]=old_boards[index*N+i];
+        }
+        copy_bits(attempt, &(new_boards+next_board_index*N)[empty_row],0,empty_col*4,4);
+        }
+
+    break; 
+}  
+}
