@@ -74,7 +74,7 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i<zeros; i++) {
 
         //gpuErrchk(cudaMemcpy(&host_count, board_index, sizeof(int), cudaMemcpyDeviceToHost));
-        host_count = board_index;
+        &host_count = board_index;
         printf("total boards after an iteration %d: %d\n", i, host_count);
 
         gpuErrchk(cudaMemset(board_index, 0, sizeof(int)));
