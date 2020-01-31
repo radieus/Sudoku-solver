@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int sample_board[9*9]={
+int sample_board[81]={
     0,0,0,0,3,7,6,0,0, 
     0,0,0,6,0,0,0,9,0, 
     0,0,8,0,0,0,0,0,4, 
