@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <iostream>
 #include <stdbool.h>  
 #include <string.h>
 #include <time.h>
@@ -86,7 +87,7 @@ int main(int argc, char* argv[]) {
 
     gpuErrchk(cudaDeviceSynchronize());
     auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = duration_cast<microseconds>(stop - start); 
+    auto duration = std::chrono::duration_cast<microseconds>(stop - start); 
     std::cout << duration.count() << std::endl; 
     gpuErrchk(cudaFree(new_boards));
     gpuErrchk(cudaFree(old_boards));
