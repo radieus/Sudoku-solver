@@ -8,7 +8,7 @@
 #include <inttypes.h>
 #include <chrono>
 
-#include "CudaSudoku.cu"
+#include "Functions.cu"
 #include "samples.h"
 
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
