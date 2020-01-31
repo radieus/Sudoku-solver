@@ -2,9 +2,6 @@
 #include <cstdio>
 #include <stdio.h>
 
-#include <cuda_runtime.h>
-#include "BitOperations.cu"
-
 #define N 9
 #define n 3
 
@@ -13,79 +10,30 @@ typedef struct params{
     int col;
 }params_t;
 
-__global__ void cudaBFSSudoku(uint64_t *old_boards,
-        uint64_t *new_boards,
-        int total_boards,
-        int *board_index,
-        int empty_row,
-        int empty_col) {
-    
-    unsigned int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    
-    unsigned int index=tid/N;
 
-    int attempt = tid - N*index + 1;
+__host__ void load(char *FileName, uint64_t *board) {
+    FILE * a_file = fopen(FileName, "r");
 
-    while (index < total_boards) {
-
-        int next_board_index=0;           
-        bool works = true;
-
-        int box_row = empty_row/n;
-        int box_col = empty_col/n;
-
-        if (!check_row(old_boards+index*N,empty_row,attempt)) 
-            works = false;
-        else if (!check_col(old_boards+index*N,empty_col,attempt)) 
-            works = false;
-        else if (!check_box(old_boards+index*N,box_row,box_col,attempt))
-            works = false;
-
-        if (works) {
-            next_board_index = atomicAdd(board_index, 1);
-            for (int i = 0; i < N; i++) {
-                new_boards[next_board_index*N+i]=old_boards[index*N+i];
-            }
-            copy_bits(attempt, &(new_boards+next_board_index*N)[empty_row],0,empty_col*4,4);
-            }
-
-        break; 
-    }  
-}
-
-__device__ __host__ bool findEmptySpot(uint64_t *board, int *row, int *col) {
-    for (int r = 0; r < N; r++) {
-        for (int c = 0; c < N; c++) {
-            if (board[r * N + c] == 0) {
-                *row = r;
-                *col = c;
-                return true;
-            }
-        }
+    if (a_file == NULL) {
+        printf("File load fail!\n"); return;
     }
 
-    return false;
-}
-
-__device__ __host__ void print_sudoku(uint64_t *val) {
+    char temp;
 
     for (int i = 0; i < N; i++) {
-        if (i % n == 0) {
-            printf("------------------------\n");
-        }
-
         for (int j = 0; j < N; j++) {
-            if (j % n == 0) {
-            printf("| ");
+            if (!fscanf(a_file, "%c\n", &temp)) {
+                printf("File loading error!\n");
+                return;
             }
-            uint64_t tmp=0;
-            copy_bits(val[i],&tmp,j*4,0,4);
-            printf("%li ", tmp);
-        }
 
-        printf("|\n");
+            if (temp >= '1' && temp <= '9') {
+                board[i * N + j] = (int) (temp - '0');
+            } else {
+                board[i * N + j] = 0;
+            }
+        }
     }
-    printf("------------------------\n");
 }
 
 
@@ -121,6 +69,40 @@ __device__ __host__ void setup_board(uint64_t *src, int *board){
     }
 }
 
+__device__ __host__ void print_sudoku_from_b64(uint64_t *val) {
+
+    for (int i = 0; i < N; i++) {
+        if (i % n == 0) {
+            printf("-----------------------\n");
+        }
+
+        for (int j = 0; j < N; j++) {
+            if (j % n == 0) {
+            printf("| ");
+            }
+            uint64_t tmp=0;
+            copy_bits(val[i],&tmp,j*4,0,4);
+            printf("%li ", tmp);
+        }
+
+        printf("|\n");
+    }
+    printf("-----------------------\n");
+}
+
+__device__ __host__ bool findEmptySpot(uint64_t *board, int *row, int *col) {
+    for (int r = 0; r < N; r++) {
+        for (int c = 0; c < N; c++) {
+            if (board[r * N + c] == 0) {
+                *row = r;
+                *col = c;
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
 
 __device__ __host__ params_t find_epmty_index(uint64_t *val, int row, int col){
    
