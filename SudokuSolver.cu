@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
     auto start = std::chrono::high_resolution_clock::now(); 
     params=find_empty_index(test,0,0);
 
-    printf("Empty index %i : %i\n", params.row, params.col);
+    printf("Init index (%i, %i)\n", params.row, params.col);
 
     cudaBFSSudoku<<<1,N>>>(new_boards, old_boards, 1, board_index, params.row, params.col);
 
@@ -62,7 +62,6 @@ int main(int argc, char* argv[]) {
         printf("total boards after an iteration %d: %d\n", i, board_index);
 
         board_index = 0;
-
         maxBlocks=(N*host_count+256-1)/256;
 
         if (i % 2 == 0) {
@@ -77,7 +76,6 @@ int main(int argc, char* argv[]) {
 
     //gpuErrchk(cudaMemcpy(&host_count, board_index, sizeof(int), cudaMemcpyDeviceToHost));
     
-    printf("new number of boards retrieved is %d\n", host_count);
     if(zeros % 2 == 0){ // if odd number of iterations run, then send it old boards not new boards;
         print_sudoku(new_boards);
     }
