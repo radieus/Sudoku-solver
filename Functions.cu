@@ -81,7 +81,7 @@ __device__ __host__ void setup_board(uint64_t *src, int *board){
 }
 
 
-__device__ __host__ params_t find_epmty_index(uint64_t *val, int row, int col){
+__device__ __host__ params_t find_empty_index(uint64_t *val, int row, int col){
    
     for(int i=row;i<N;i++){
         for(int j=0;j<N;j++){
