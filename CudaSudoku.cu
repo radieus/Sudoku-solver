@@ -67,11 +67,11 @@ __device__ __host__ bool findEmptySpot(uint64_t *board, int *row, int *col) {
     return false;
 }
 
-__device__ __host__ void print_sudoku_from_b64(uint64_t *val) {
+__device__ __host__ void print_sudoku(uint64_t *val) {
 
     for (int i = 0; i < N; i++) {
         if (i % n == 0) {
-            printf("-----------------------\n");
+            printf("------------------------\n");
         }
 
         for (int j = 0; j < N; j++) {
@@ -85,7 +85,7 @@ __device__ __host__ void print_sudoku_from_b64(uint64_t *val) {
 
         printf("|\n");
     }
-    printf("-----------------------\n");
+    printf("------------------------\n");
 }
 
 

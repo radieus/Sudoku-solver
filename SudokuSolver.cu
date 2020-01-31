@@ -79,10 +79,10 @@ int main(int argc, char* argv[]) {
     
     printf("new number of boards retrieved is %d\n", host_count);
     if(zeros % 2 == 0){ // if odd number of iterations run, then send it old boards not new boards;
-        print_sudoku_from_b64(new_boards);
+        print_sudoku(new_boards);
     }
     else{
-        print_sudoku_from_b64(old_boards);
+        print_sudoku(old_boards);
     }
 
     gpuErrchk(cudaDeviceSynchronize());
