@@ -9,7 +9,6 @@
 
 #include "CudaSudoku.cu"
 #include "samples.h"
-using namespace std::chrono;
 
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)
@@ -22,8 +21,6 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
 }
 
 int main(int argc, char* argv[]) {
-
-    cudaEvent_t event1,event2;
     
     uint64_t test[N];
     memset(test,0,N*sizeof(uint64_t));
@@ -31,12 +28,12 @@ int main(int argc, char* argv[]) {
     uint64_t *new_boards;
     uint64_t *old_boards;
     int *board_index;
+    const int sk = pow(2,27);
 
     gpuErrchk(cudaMallocManaged(&new_boards,sk*sizeof(uint64_t)));
     gpuErrchk(cudaMallocManaged(&old_boards,sk*sizeof(uint64_t)));
     gpuErrchk(cudaMallocManaged(&board_index,sizeof(int)));
 
-    const int sk = pow(2,27);
     int host_count;
     int maxBlocks;
     int zeros;
@@ -49,7 +46,7 @@ int main(int argc, char* argv[]) {
 
     gpuErrchk(cudaMemcpy(new_boards,test,N*sizeof(uint64_t),cudaMemcpyHostToDevice));
 
-    auto start = high_resolution_clock::now(); 
+    auto start = std::chrono::high_resolution_clock::now(); 
     params=find_epmty_index(test,0,0);
 
     printf("Empty index %i : %i\n", params.row, params.col);
@@ -73,7 +70,7 @@ int main(int argc, char* argv[]) {
         }
         else {
             cudaBFSSudoku<<<maxBlocks,256>>>(new_boards, old_boards, host_count, board_index, params.row, params.col);
-            params=find_epmty_index(old_boards, params.row, arams.col);
+            params=find_epmty_index(old_boards, params.row, params.col);
         }
     }
 
@@ -88,9 +85,9 @@ int main(int argc, char* argv[]) {
     }
 
     gpuErrchk(cudaDeviceSynchronize());
-    auto stop = high_resolution_clock::now();
+    auto stop = std::chrono::high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(stop - start); 
-    cout << duration.count() << endl; 
+    std::cout << duration.count() << std::endl; 
     gpuErrchk(cudaFree(new_boards));
     gpuErrchk(cudaFree(old_boards));
     gpuErrchk(cudaFree(board_index));
