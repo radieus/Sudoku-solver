@@ -15,7 +15,7 @@ __global__ void cudaBFSSudoku(uint64_t *old_boards,
     
     unsigned int index=tid/N;
 
-    int attempt=tid-index*N+1;
+    int attempt = tid - N*index + 1;
 
     while (index < total_boards) {
 
@@ -25,9 +25,12 @@ __global__ void cudaBFSSudoku(uint64_t *old_boards,
         int box_row = empty_row/n;
         int box_col = empty_col/n;
 
-        if(!check_row(old_boards+index*N,empty_row,attempt)) works=false;
-            else if(!check_col(old_boards+index*N,empty_col,attempt)) works=false;
-                else if(!check_box(old_boards+index*N,box_row,box_col,attempt)) works=false;
+        if (!check_row(old_boards+index*N,empty_row,attempt)) 
+            works = false;
+        else if (!check_col(old_boards+index*N,empty_col,attempt)) 
+            works = false;
+        else if (!check_box(old_boards+index*N,box_row,box_col,attempt))
+            works = false;
 
         if (works) {
             next_board_index = atomicAdd(board_index, 1);
