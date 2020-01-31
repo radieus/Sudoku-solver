@@ -40,7 +40,6 @@ void printBoard(int *board) {
 
 int main(int argc, char* argv[]) {
 
-#pragma region Delclaration
     cudaEvent_t event1,event2;
     
     uint64_t test[N];
