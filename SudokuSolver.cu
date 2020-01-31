@@ -75,8 +75,8 @@ int main(int argc, char* argv[]) {
     gpuErrchk(cudaEventCreate(&event2));
 
     //------------------------------------------------------------------------------------------------------------------------
-    //setup_board(test,test9);
-    load("sudoku.txt", test);
+    setup_board(test,test9);
+    //load("sudoku.txt", test);
     //------------------------------------------------------------------------------------------------------------------------
     
     print_sudoku_from_b64(test);
